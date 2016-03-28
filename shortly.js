@@ -75,28 +75,26 @@ app.post('/links', function(req, res) {
 /************************************************************/
 
 
-// app.get (/login)
-//render login page
-
 app.get('/login', function(req, res) {
-  console.log('get request to login page, redirect worked');
   res.send(200);
 });
 
+
+
+app.get('/signup', function(req, res) {
+  res.send(200);
+});
 
 
 app.post('/login', function(req, res) {
   var username = req.body.username;
   var password = req.body.password;
 
-  new User({ username: username }).fetch().then(function(found) {
-    // if user+pw combo already exists
+  util.logUserIn(username, password, function (found) {
     if (found) {
-      console.log('user exists');
-      // check if user+pw combo is correct
-      res.send(200, found.attributes);
+      res.redirect('/');
     } else {
-      res.redirect('/signup');
+      res.redirect('/login');
     }
   });
 });
@@ -107,9 +105,7 @@ app.post('/signup', function(req, res) {
   var password = req.body.password;
 
   new User({ username: username }).fetch().then(function(found) {
-    // if user+pw combo already exists
     if (found) {
-      console.log('user exists');
       res.redirect('login');
     } else {
       Users.create({
@@ -122,21 +118,7 @@ app.post('/signup', function(req, res) {
     }
   });
 });
-// app.post
-// check if user exists in database
-  // Username does not exist - did you type your password wrong, or go to sign up page below
-  // Username DOES exist, but password is wrong - either you typed your password wrong, or someone already has your username
-  // else 200 okay
 
-
-
-// app.get(/sign up)
-
-
-// app.post(/sign up)
-// new User
-  // if found - move to login
-  // else User.create {username and password}
 
 
 
