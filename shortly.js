@@ -40,6 +40,7 @@ function(req, res) {
   });
 });
 
+
 app.post('/links', 
 function(req, res) {
   var uri = req.body.url;
@@ -75,6 +76,26 @@ function(req, res) {
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
+
+
+// app.get (/login)
+//render login page
+
+// app.post
+// check if user exists in database
+  // Username does not exist - did you type your password wrong, or go to sign up page below
+  // Username DOES exist, but password is wrong - either you typed your password wrong, or someone already has your username
+  // else 200 okay
+
+
+
+// app.get(/sign up)
+
+
+// app.post(/sign up)
+// new User
+  // if found - move to login
+  // else User.create {username and password}
 
 
 
