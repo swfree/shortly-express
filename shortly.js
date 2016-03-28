@@ -23,26 +23,23 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 
 
-app.get('/', 
-function(req, res) {
+app.get('/', util.isLoggedIn, function(req, res) {
+  console.log('app get is being called');
   res.render('index');
 });
 
-app.get('/create', 
-function(req, res) {
+app.get('/create', util.isLoggedIn, function(req, res) {
   res.render('index');
 });
 
-app.get('/links', 
-function(req, res) {
+app.get('/links', util.isLoggedIn, function(req, res) {
   Links.reset().fetch().then(function(links) {
     res.send(200, links.models);
   });
 });
 
 
-app.post('/links', 
-function(req, res) {
+app.post('/links', function(req, res) {
   var uri = req.body.url;
 
   if (!util.isValidUrl(uri)) {
@@ -81,6 +78,50 @@ function(req, res) {
 // app.get (/login)
 //render login page
 
+app.get('/login', function(req, res) {
+  console.log('get request to login page, redirect worked');
+  res.send(200);
+});
+
+
+
+app.post('/login', function(req, res) {
+  var username = req.body.username;
+  var password = req.body.password;
+
+  new User({ username: username }).fetch().then(function(found) {
+    // if user+pw combo already exists
+    if (found) {
+      console.log('user exists');
+      // check if user+pw combo is correct
+      res.send(200, found.attributes);
+    } else {
+      res.redirect('/signup');
+    }
+  });
+});
+
+
+app.post('/signup', function(req, res) {
+  var username = req.body.username;
+  var password = req.body.password;
+
+  new User({ username: username }).fetch().then(function(found) {
+    // if user+pw combo already exists
+    if (found) {
+      console.log('user exists');
+      res.redirect('login');
+    } else {
+      Users.create({
+        username: username,
+        password: password
+      })
+      .then(function(newUser) {
+        res.redirect('/');
+      });
+    }
+  });
+});
 // app.post
 // check if user exists in database
   // Username does not exist - did you type your password wrong, or go to sign up page below
