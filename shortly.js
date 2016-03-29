@@ -105,7 +105,7 @@ app.post('/signup', function(req, res) {
 
   new User({ username: username }).fetch().then(function(found) {
     if (found) {
-      alert('This username already exists! Please log in, or redo your sign up with a new username.');
+      //NEEDS SOMETHINGalert('This username already exists! Please log in, or redo your sign up with a new username.');
       res.redirect('/login');
     } else {
       console.log('not found: ', username);
