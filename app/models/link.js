@@ -6,7 +6,6 @@ var User = require('./user');
 var Link = db.Model.extend({
   tableName: 'urls',
   hasTimestamps: true,
-
   defaults: {
     visits: 0
   },

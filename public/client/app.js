@@ -8,7 +8,6 @@ window.Shortly = Backbone.View.extend({
   },
 
   initialize: function() {
-    console.log( 'Shortly is running' );
     $('body').append(this.render().el);
 
     this.router = new Shortly.Router({ el: this.$el.find('#container') });
@@ -31,9 +30,6 @@ window.Shortly = Backbone.View.extend({
     e && e.preventDefault();
     this.router.navigate('/create', { trigger: true });
   },
-
-  // create renderLoginPage function
-  //this.router.navigate (/login)
 
   updateNav: function(routeName) {
     this.$el.find('.navigation li a')

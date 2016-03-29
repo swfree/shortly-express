@@ -22,36 +22,38 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 // Set cookies
-app.use(session({ secret: 'pineapple', resave: false, cookie: { path: '/', expires: false, maxAge: 1200000, httpOnly: true }}));
+app.use(session({ secret: 'pineapple', saveUninitialized: true, resave: false, cookie: { path: '/', expires: false, maxAge: 1200000, httpOnly: true }}));
 
 
 
-app.get('/', util.isLoggedIn, function(req, res) {
+app.get('/', util.checkUser, function(req, res) {
   res.render('index');
 });
 
-app.get('/create', util.isLoggedIn, function(req, res) {
+app.get('/create', util.checkUser, function(req, res) {
   console.log(req.session.views);
   res.render('index');
 });
 
-app.get('/links', util.isLoggedIn, function(req, res) {
-  Links.reset().fetch().then(function(links) {
+app.get('/links', util.checkUser, function(req, res) {
+  // somehow query so that userId === req.session.user.id
+
+  Links.reset().query('where', 'userId', '=', req.session.user.id).fetch().then(function(links) {
     res.send(200, links.models);
   });
 });
 
 
-app.post('/links', function(req, res) {
+app.post('/links', util.checkUser, function(req, res) {
   var uri = req.body.url;
 
   if (!util.isValidUrl(uri)) {
     console.log('Not a valid url: ', uri);
     return res.send(404);
   }
-
-  new Link({ url: uri }).fetch().then(function(found) {
-    if (found) {
+  console.log('post new link. username: ', req.session.user.id);
+  new Link({ url: uri }).query('where', 'userId', '=', req.session.user.id).fetch().then(function(found) {
+    if (found) { // but not current user
       res.send(200, found.attributes);
     } else {
       util.getUrlTitle(uri, function(err, title) {
@@ -63,7 +65,8 @@ app.post('/links', function(req, res) {
         Links.create({
           url: uri,
           title: title,
-          baseUrl: req.headers.origin
+          baseUrl: req.headers.origin,
+          userId: req.session.user.id
         })
         .then(function(newLink) {
           res.send(200, newLink);
@@ -77,6 +80,11 @@ app.post('/links', function(req, res) {
 // Write your authentication routes here
 /************************************************************/
 
+app.get('/logout', function(req, res) {
+  req.session.destroy(function() {
+    res.redirect('/login');
+  });
+});
 
 app.get('/login', function(req, res) {
   res.render('login');
@@ -88,24 +96,41 @@ app.get('/signup', function(req, res) {
 
 
 app.post('/login', function(req, res) {
-  util.setLoginState(req, res);
+  var username = req.body.username;
+  var password = req.body.password;
+
+  new User({ username: username }).fetch().then(function(user) {
+    if (!user) {
+      res.redirect('/login');
+    } else {
+      user.comparePassword(password, function(match) {
+        if (match) {
+          util.createSession(req, res, user);
+        } else {
+          res.redirect('/login');
+        }
+      });
+    }
+  });
 });
+
 
 app.post('/signup', function(req, res) {
   var username = req.body.username;
   var password = req.body.password;
 
-  new User({ username: username }).fetch().then(function(found) {
-    if (found) {
-      //NEEDS SOMETHINGalert('This username already exists! Please log in, or redo your sign up with a new username.');
-      res.redirect('/login');
+  new User({ username: username }).fetch().then(function(user) {
+    if (user) {
+      console.log('Account already exists!');
+      res.redirect('/signup');
     } else {
-      new User({ 
+      var newUser = new User({ 
         username: username,
         password: password
-      }).save()
+      });
+      newUser.save()
       .then(function(newUser) {
-        res.redirect('/login');
+        util.createSession(req, res, newUser);
       });
     }
   });
