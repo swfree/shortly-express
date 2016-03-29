@@ -79,13 +79,6 @@ app.post('/links', function(req, res) {
 
 
 app.get('/login', function(req, res) {
-  if (req.session.views) {
-    req.session.views++;
-    console.log(req.session.views);
-  } else {
-    req.session.views = 1;
-    console.log(req.session.views);
-  }
   res.render('login');
 });
 
@@ -101,21 +94,18 @@ app.post('/login', function(req, res) {
 app.post('/signup', function(req, res) {
   var username = req.body.username;
   var password = req.body.password;
-  console.log(username);
 
   new User({ username: username }).fetch().then(function(found) {
     if (found) {
       //NEEDS SOMETHINGalert('This username already exists! Please log in, or redo your sign up with a new username.');
       res.redirect('/login');
     } else {
-      console.log('not found: ', username);
-      Users.create({
+      new User({ 
         username: username,
         password: password
-      })
-      .then(function() {     
-        console.log('created user, ', username);
-        util.setLoginState(req, res); 
+      }).save()
+      .then(function(newUser) {
+        res.redirect('/login');
       });
     }
   });
