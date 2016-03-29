@@ -22,7 +22,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 // Set cookies
-app.use(session({ secret: 'pineapple', cookie: {maxAge: 12000}}));
+app.use(session({ secret: 'pineapple', resave: false, cookie: { path: '/', expires: false, maxAge: 1200000, httpOnly: true }}));
 
 
 
@@ -31,6 +31,7 @@ app.get('/', util.isLoggedIn, function(req, res) {
 });
 
 app.get('/create', util.isLoggedIn, function(req, res) {
+  console.log(req.session.views);
   res.render('index');
 });
 
@@ -78,6 +79,13 @@ app.post('/links', function(req, res) {
 
 
 app.get('/login', function(req, res) {
+  if (req.session.views) {
+    req.session.views++;
+    console.log(req.session.views);
+  } else {
+    req.session.views = 1;
+    console.log(req.session.views);
+  }
   res.render('login');
 });
 
