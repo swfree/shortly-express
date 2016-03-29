@@ -2,6 +2,7 @@ var db = require('../config');
 var bcrypt = require('bcrypt-nodejs');
 var Promise = require('bluebird');
 var Link = require('./link');
+// var hash = bcrypt.hashSync('bacon', 8);
 
 var User = db.Model.extend({
   tableName: 'users',
@@ -11,20 +12,15 @@ var User = db.Model.extend({
     return this.hasMany(Link);
   },
 
-
-
-  // TODO: hash password on initialize
-  // initialize: function(userData) {
+  // TODO: fix bcrypt stuff
+  // initialize: function() {
   //   this.on('creating', function(model, attrs, options) {
-  //     model.set('username', attrs.username);
-  //     model.set('password', attrs.password);
+  //     console.log(attrs);
+  //     bcrypt.hash(attrs.password, 10, function(err, hash) {
+  //       model.set('password', hash);
+  //     });
   //   });
   // }
-
-// defaults needs username, password
-
-// build out similar to link.js!
-
 });
 
 module.exports = User;

@@ -111,7 +111,7 @@ app.post('/signup', function(req, res) {
       console.log('not found: ', username);
       Users.create({
         username: username,
-        password: password,
+        password: password
       })
       .then(function() {     
         console.log('created user, ', username);
